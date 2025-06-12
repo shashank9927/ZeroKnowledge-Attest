@@ -11,7 +11,7 @@ const auditLogSchema = new mongoose.Schema( {
         required: true,
         enum: ['view', 'verify', 'verify_public',
             'update', 'delete', 'create',
-            'generate_token', 'delete_token'
+            'generate_token', 'delete_token', 'verify_token'
         ],
 
     },
