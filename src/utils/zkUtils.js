@@ -20,6 +20,6 @@ module.exports = {
     generateHash,
     generateProof,
     verifyProof
-}
+};
 
 
