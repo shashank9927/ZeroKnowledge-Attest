@@ -157,7 +157,7 @@ router.put('/:id', auth, async(req, res) => {
         const document = await Document.findById(req.params.id).exec();
 
         if(!document) {
-            return res.status(400).json({
+            return res.status(404).json({
                 message: 'Document not found'
             });
         }
