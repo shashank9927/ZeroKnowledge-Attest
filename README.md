@@ -1,237 +1,193 @@
 # ZeroKnowledge-Attest
 
-A secure API for notarizing documents using zero-knowledge proofs, enabling verification while preserving privacy and confidentiality.
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [API Documentation](#api-documentation)
-  - [Authentication](#authentication)
-  - [Document Management](#document-management)
-  - [Document Verification](#document-verification)
-  - [Audit Logs](#audit-logs)
-- [Token System](#token-system)
-- [System Architecture](#system-architecture)
-- [Security](#security)
-- [License](#license)
-
-## Overview
-
-ZeroKnowledge-Attest is a document notarization system built with Node.js that allows secure verification of document authenticity without exposing the actual document contents. The system uses zero-knowledge proofs to validate document integrity while maintaining complete confidentiality.
+A Node.js API for attesting or notarizing documents with **zero-knowledge proof-based verification**, providing secure, privacy-preserving, and auditable document authenticity checks.
+The system features **Public Verification**, **usage-limited verification tokens**, **JWT authentication** and **detailed audit logging**.
 
 ## Features
 
-- **Zero-Knowledge Document Verification**: Verify document authenticity without revealing content
-- **Secure User Authentication**: JWT-based authentication system
-- **Comprehensive Document Management**: Upload, update, retrieve, and delete documents
-- **Verification Token System**: Generate limited-use tokens for sharing verification capabilities
-- **Detailed Audit Logging**: Track all verification attempts and document activities
-- **Public Verification API**: Allow third parties to verify documents with appropriate tokens
+* **Zero-Knowledge Document Verification**: Authenticate documents without revealing their content
+* **JWT Authentication**: Secure login and authorization for all endpoints
+* **Comprehensive Document Management**: Upload, update, retrieve, and delete documents
+* **Usage-Limited Verification Tokens**: Share verification rights with limited uses
+* **Detailed Audit Logging**: All critical actions and verifications are logged
+* **Public Verification API**: Third-party verification with tokens
 
 ## Technology Stack
 
-- **Backend**: Node.js with Express.js
-- **Database**: MongoDB
-- **Authentication**: JWT (JSON Web Tokens)
-- **Security**: Zero-Knowledge Proof cryptography
+* **Backend**: Node.js and Express.js
+* **Database**: MongoDB
+* **Authentication**: JSON Web Tokens (JWT)
+* **Security**: Zero-Knowledge Proof cryptography
 
-## Installation
+## 📸 Some Postman API Previews
 
-```bash
-# Clone the repository
-git clone https://github.com/shashankkrish/ZeroKnowledge-Attest.git
-cd ZeroKnowledge-Attest
+### POST /api/auth/login [User Login]
 
-# Install dependencies
-npm install
-
-# Start the server
-npm start
-```
-
-## Configuration
-
-Create a `.env` file in the root directory with the following variables:
-
-```
-MONGO_URI=mongodb://localhost:27017/zk-notary
-JWT_SECRET=your_secret_key_here
-PORT=3000
-ZK_SECRET=your_zk_secret_key_here
-```
-
-## API Documentation
-
-### Authentication
-
-#### Register User
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
-
-#### Login User
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "john@example.com",
-  "password": "password123"
-}
-```
-
-### Document Management
-
-#### Upload Document
-```http
-POST /api/documents
-x-auth-token: {{auth_token}}
-Content-Type: multipart/form-data
-
-document: [file]
-title: Contract Agreement
-description: Legal contract between parties
-```
-
-#### Get User's Documents
-```http
-GET /api/documents
-x-auth-token: {{auth_token}}
-```
-
-#### Get Document Details
-```http
-GET /api/documents/:id
-x-auth-token: {{auth_token}}
-```
-
-#### Update Document Metadata
-```http
-PUT /api/documents/:id
-x-auth-token: {{auth_token}}
-Content-Type: application/json
-
-{
-  "title": "Updated Title",
-  "description": "Updated description"
-}
-```
-
-#### Delete Document
-```http
-DELETE /api/documents/:id
-x-auth-token: {{auth_token}}
-```
-
-### Document Verification
-
-#### Authenticated Verification (Owner Only)
-```http
-POST /api/zk/verify
-x-auth-token: {{auth_token}}
-Content-Type: multipart/form-data
-
-document: [file]
-documentId: 64a1b2c3d4e5f6a7b8c9d0e1
-```
-
-#### Generate Verification Token (For Sharing)
-```http
-POST /api/tokens
-x-auth-token: {{auth_token}}
-Content-Type: application/json
-
-{
-  "documentId": "64a1b2c3d4e5f6a7b8c9d0e1",
-  "usageLimit": 10
-}
-```
-
-#### List Verification Tokens
-```http
-GET /api/tokens
-x-auth-token: {{auth_token}}
-```
-
-#### Get Tokens for Specific Document
-```http
-GET /api/tokens/:documentId
-x-auth-token: {{auth_token}}
-```
-
-#### Delete Verification Token
-```http
-DELETE /api/tokens/:id
-x-auth-token: {{auth_token}}
-```
-
-#### Public Verification (With Token)
-```http
-POST /api/public/verify
-Content-Type: multipart/form-data
-
-document: [file]
-verificationToken: a1b2c3d4e5f6g7h8i9j0...
-```
-
-### Audit Logs
-
-#### Get Document Audit Logs
-```http
-GET /api/audit/documents/:id
-x-auth-token: {{auth_token}}
-```
-
-#### Get User Activity Logs
-```http
-GET /api/audit/me
-x-auth-token: {{auth_token}}
-```
-
-## Token System
-
-The verification token system uses usage-based expiry instead of time-based expiry:
-
-- **Usage Limit**: Each token has a configurable usage limit (default: 5 uses)
-- **Usage Count**: Tracks how many times the token has been used for verification
-- **Automatic Expiry**: Once the usage limit is reached, the token becomes invalid
-- **Flexible Sharing**: Tokens can be used multiple times until the limit is exceeded
-
-### Benefits of Usage-Based Tokens:
-- **Predictable Control**: Know exactly how many verifications each token allows
-- **No Time Pressure**: Tokens don't expire due to time, only usage
-- **Customizable Access**: Set precise limits based on your needs
-- **Resource Efficient**: No need to worry about tokens expiring before they're used
-
-## System Architecture
-
-- **Modular Route Structure**: Organized API endpoints for specific functionality
-- **Middleware Authentication**: JWT validation for protected routes
-- **MongoDB Integration**: Persistent storage for users, documents, tokens, and audit logs
-- **Error Handling**: Centralized error management for consistent responses
-
-## Security
-
-- **Zero-Knowledge Proofs**: Document verification without content exposure
-- **JWT Authentication**: Secure, token-based user authentication
-- **Usage-Limited Tokens**: Controlled access to verification functionality
-- **Comprehensive Logging**: Audit trail for all security-relevant actions
-
-## License
-
-This project is licensed under the ISC License.
+![User Login](assets-postman/2.%20user%20login.png)
 
 ---
 
-Created by Shashank Krishnaprasad
+### POST /api/documents [Upload Document]
+
+![Upload Document](assets-postman/3.%20post%20document%20API%20endpoint.png)
+
+---
+
+### POST /api/tokens [Generate Verification Token and Set Usage Limit]
+
+![Generate Verification Token](assets-postman/6.%20generate%20token%20for%20the%20specific%20document%20ID.png)
+
+---
+
+### POST /api/public/verify [Public Verification of Attested Documents]
+
+![Public Verification](assets-postman/9.%20public%20verification%20API%20endpoint.png)
+
+---
+
+### Token usage count increments after verification of a document
+
+![Token usage count increases](assets-postman/9a.%20usage%20count%20updation%20in%20database%20after%20token%20use.png)
+
+---
+
+### GET /api/audit/:documentId [View Audit Logs of Document By ID]
+
+![View Audit Log](assets-postman/10.%20audit%20log%20API%20endpoint.png)
+
+---
+
+## API Endpoints
+
+### Authentication
+
+* `POST /api/auth/register` – Register a new user
+* `POST /api/auth/login` – Login and receive JWT
+
+### Document Management
+
+* `POST /api/documents` – Upload a new document
+* `GET /api/documents` – List all user's documents
+* `GET /api/documents/:id` – Get details for a document
+* `PUT /api/documents/:id` – Update document metadata
+* `DELETE /api/documents/:id` – Delete a document
+
+### Document Verification
+
+* `POST /api/zk/verify` – Owner-only zero-knowledge verification
+* `POST /api/public/verify` – Public verification using a verification token
+
+### Verification Token Management
+
+* `POST /api/tokens` – Generate/share a verification token
+* `GET /api/tokens` – List all issued tokens
+* `GET /api/tokens/:documentId` – List tokens for a document
+* `DELETE /api/tokens/:id` – Delete a verification token
+
+### Audit Logging
+
+* `GET /api/audit/documents/:id` – Get audit logs for a document
+* `GET /api/audit/me` – Get user activity logs
+
+## Verification Token System
+
+The verification token system is **usage-based**:
+
+* **Usage Limit**: Each token is valid for a configurable number of uses (default: 5)
+* **Usage Count**: Every verification attempt increments the counter
+* **Automatic Expiry**: Token becomes invalid when usage limit is reached
+* **Flexible Sharing**: Allows sharing verification rights without time pressure
+
+### Benefits
+
+* **Predictable Access**: Control exactly how many verifications are allowed
+* **No Time Expiry**: Tokens expire by use, not by date
+* **Customizable**: Set usage limits per token
+* **Resource Efficient**: Avoids unused token expirations
+
+## Getting Started
+
+### Prerequisites
+
+* Node.js 14.x or later
+* MongoDB instance
+
+### Installation
+
+1. Clone the repository
+
+   ```bash
+   git clone https://github.com/shashankkrish/ZeroKnowledge-Attest.git
+   cd ZeroKnowledge-Attest
+   ```
+
+2. Install dependencies
+
+   ```bash
+   npm install
+   ```
+
+3. Add environment variables  
+   Create a `.env` file:
+
+   ```
+   MONGO_URI=mongodb://localhost:27017/zk-notary
+   JWT_SECRET=your_secret_key_here
+   PORT=5132
+   ZK_SECRET=your_zk_secret_key_here
+   ```
+
+4. Start the server
+
+   ```bash
+   npm start
+   ```
+
+## Security Features
+
+* **Zero-Knowledge Proofs**: Ensures privacy during verification
+* **JWT Authentication**: Secure, stateless session handling
+* **Usage-Limited Tokens**: Fine-grained, shareable verification access
+* **Audit Logging**: Tracks all sensitive and critical actions
+
+## Project Structure
+
+```
+├─ src/                      # Backend source code
+│  ├─ middleware/            # JWT authentication middleware
+│  │  └─ auth.js
+│  ├─ models/                # MongoDB schemas and models
+│  │  ├─ AuditLog.js
+│  │  ├─ Document.js
+│  │  ├─ User.js
+│  │  └─ VerificationToken.js
+│  ├─ routes/                # Express route definitions
+│  │  ├─ audit.js
+│  │  ├─ auth.js
+│  │  ├─ documents.js
+│  │  ├─ public.js
+│  │  ├─ tokens.js
+│  │  └─ zk.js
+│  ├─ utils/                 # Utility functions
+│  │  ├─ auditUtils.js
+│  │  ├─ errorUtils.js
+│  │  ├─ upload.js
+│  │  └─ zkUtils.js
+│  └─ server.js              # Main application entry point
+├─ assets-postman/           
+│  ├─ 1.user-register.png
+│  ├─ 2.user-login.png
+│  ├─ 3.post-document.png
+│  └─ ...                    # Screenshots of all API responses in assets-postman/
+├─ .env                      # Environment variable definitions
+├─ package.json              # Project dependencies and scripts
+└─ README.md                 # Project documentation (this file)
+```
+
+## Author
+
+Shashank Krishnaprasad
+
+## License
+
+This project is licensed under the ISC License - see the LICENSE file for details.
